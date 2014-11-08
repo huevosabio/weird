@@ -3,22 +3,28 @@
 
 var Image = require("parse-image");
  
-Parse.Cloud.beforeSave("Meal", function(request, response) {
-  var picture = request.object;
-  if (!picture.get("photo")) {
+Parse.Cloud.beforeSave("Picture", function(request, response) {
+  var pic = request.object;
+  if (!pic.get("picture")) {
     response.error("No file uploaded!");
     return;
   }
   
-  if (!picture.dirty("photo")) {
+  if (pic.dirty("picture")) {
     // The picture isn't being modified
+    CropImage(pic);
     response.success();
     return;
   }
-
   
+  
+});
+  
+ 
+ 
+function CropImage(picture){ 
   Parse.Cloud.httpRequest({
-    url: picture.get("photo").url()
+    url: picture.get("picture").url()
  
   }).then(function(response) {
     var image = new Image();
@@ -50,11 +56,11 @@ Parse.Cloud.beforeSave("Meal", function(request, response) {
  
   }).then(function(cropped) {
     // Attach the image file to the original object.
-    picture.set("photo", cropped);
+    picture.set("picture", cropped);
  
   }).then(function(result) {
-    response.success();
+    return;
   }, function(error) {
     response.error(error);
   });
-});
+}
