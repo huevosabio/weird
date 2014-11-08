@@ -1,0 +1,14 @@
+{
+    "applications": {
+        "LetsGetWeird": {
+            "applicationId": "S8GolqVVSBvke4RSyrTNXLNKuyys1j8IZ9DYTcEh", 
+            "masterKey": "4Cy8LIfZQY1Fi4q2HYpAu6mZbeBeMfo6EA1ZsRcq"
+        }, 
+        "_default": {
+            "link": "LetsGetWeird"
+        }
+    }, 
+    "global": {
+        "parseVersion": "1.3.1"
+    }
+}
