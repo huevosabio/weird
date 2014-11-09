@@ -2,20 +2,45 @@
 // Use Parse.Cloud.define to define as many cloud functions as you want.
 
 var Image = require("parse-image");
+
  
 Parse.Cloud.beforeSave("Meal", function(request, response) {
+  Parse.Cloud.useMasterKey();
   var picture = request.object;
+  var Pictures = Parse.Object.extend("Meal");
+  var query = new Parse.Query(Pictures);
+  query.include("author");
+  
   if (!picture.get("photo")) {
-    response.error("No file uploaded!");
-    return;
+   response.error("NO PHOTO UPLOADED!");
   }
   
-  if (!picture.dirty("photo")) {
+  if (!picture.isNew()) {
     // The picture isn't being modified
-    response.success();
+    //Let's check the 
+    if (!picture.has("likes")){
+      picture.set("likes",[]);
+    }
+    if (!picture.dirty("likes")){
+      query.get(picture.id, {
+        success: function(object) {
+          var user = object.get("author");
+          var likes = picture.get("likes");
+          for (var i = 0; i < likes.length; i++) {
+            user.addUnique("likers",likes[i]);
+          }
+          user.save().then(function(){
+            response.success();
+          },function(error){
+            response.error(error);
+          });
+        },
+        error: function(object, error) {
+          response.error(error);
+        }});
     return;
+    }
   }
-
   
   Parse.Cloud.httpRequest({
     url: picture.get("photo").url()
@@ -58,3 +83,40 @@ Parse.Cloud.beforeSave("Meal", function(request, response) {
     response.error(error);
   });
 });
+
+Parse.Cloud.beforeSave(Parse.User, function(request,response){
+  var user = request.object;
+  
+  if (!user.isNew()) {
+    //This isn't a new profile
+    response.success();
+    return;
+  }
+  
+  //user.set("likers",[]);
+  response.success();
+  return;
+  
+});
+
+
+Parse.Cloud.job("soon", function(request, status) {
+  // Set up to modify user data
+  Parse.Push.send({
+     where: new Parse.Query(Parse.Installation),
+     data: {
+          alert: "Prepare, just one hour left!"
+    }
+    });
+});
+
+Parse.Cloud.job("ending", function(request, status) {
+  // Set up to modify user data
+  Parse.Push.send({
+     where: new Parse.Query(Parse.Installation),
+     data: {
+          alert: "One last hour!"
+    }
+    });
+});
+
