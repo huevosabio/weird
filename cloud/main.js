@@ -16,7 +16,7 @@ Parse.Cloud.beforeSave("Meal", function(request, response) {
     return;
   }
 
-  
+  //testy
   Parse.Cloud.httpRequest({
     url: picture.get("photo").url()
  
