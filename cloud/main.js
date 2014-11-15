@@ -2,7 +2,6 @@
 // Use Parse.Cloud.define to define as many cloud functions as you want.
 
 var Image = require("parse-image");
-
  
 Parse.Cloud.beforeSave("Meal", function(request, response) {
   Parse.Cloud.useMasterKey();
@@ -18,6 +17,7 @@ Parse.Cloud.beforeSave("Meal", function(request, response) {
   if (!picture.isNew()) {
     // The picture isn't being modified
     //Let's check the 
+    /*
     if (!picture.has("likes")){
       picture.set("likes",[]);
     }
@@ -38,8 +38,10 @@ Parse.Cloud.beforeSave("Meal", function(request, response) {
         error: function(object, error) {
           response.error(error);
         }});
+        */
+    response.success();
     return;
-    }
+    //}
   }
   
   Parse.Cloud.httpRequest({
@@ -100,23 +102,33 @@ Parse.Cloud.beforeSave(Parse.User, function(request,response){
 });
 
 
-Parse.Cloud.job("soon", function(request, status) {
+Parse.Cloud.job("openingSoon", function(request, status) {
   // Set up to modify user data
   Parse.Push.send({
      where: new Parse.Query(Parse.Installation),
      data: {
-          alert: "Prepare, just one hour left!"
+          alert: "Prepare, doors open in one hour!"
     }
     });
 });
 
-Parse.Cloud.job("ending", function(request, status) {
+Parse.Cloud.job("endingSoon", function(request, status) {
   // Set up to modify user data
   Parse.Push.send({
      where: new Parse.Query(Parse.Installation),
      data: {
-          alert: "One last hour!"
+          alert: "Last Call! Doors close in one hour!"
     }
     });
 });
 
+
+Parse.Cloud.job("matching", function(request, status) {
+  // Set up to modify user data
+  Parse.Push.send({
+     where: new Parse.Query(Parse.Installation),
+     data: {
+          alert: "Congrats! You got matched! Start chatting now."
+    }
+    });
+});
