@@ -2,29 +2,25 @@
 // Use Parse.Cloud.define to define as many cloud functions as you want.
 
 var Image = require("parse-image");
+var Pictures = Parse.Object.extend("Meal");
  
-Parse.Cloud.beforeSave("Picture", function(request, response) {
-  var pic = request.object;
-  if (!pic.get("picture")) {
-    response.error("No file uploaded!");
-    return;
+exports.crop = function(request, response) {
+  Parse.Cloud.useMasterKey();
+  var picture = request.object;
+  var query = new Parse.Query(Pictures);
+  query.include("author");
+  
+  if (!picture.get("photo")) {
+   response.error("NO PHOTO UPLOADED!");
   }
   
-  if (pic.dirty("picture")) {
-    // The picture isn't being modified
-    CropImage(pic);
+  if (!picture.isNew()) {
     response.success();
     return;
   }
-  
-  
-});
-  
- 
- 
-function CropImage(picture){ 
+
   Parse.Cloud.httpRequest({
-    url: picture.get("picture").url()
+    url: picture.get("photo").url()
  
   }).then(function(response) {
     var image = new Image();
@@ -56,11 +52,11 @@ function CropImage(picture){
  
   }).then(function(cropped) {
     // Attach the image file to the original object.
-    picture.set("picture", cropped);
+    picture.set("photo", cropped);
  
   }).then(function(result) {
-    return;
+    response.success();
   }, function(error) {
     response.error(error);
   });
-}
+};
